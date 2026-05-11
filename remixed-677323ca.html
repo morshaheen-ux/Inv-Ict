@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICT Section — Inventory Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#f5f4f0;
+    --surface:#ffffff;
+    --surface2:#f0efe9;
+    --border:#e2e0d8;
+    --border2:#cccac0;
+    --text:#1a1917;
+    --text2:#6b6960;
+    --text3:#9e9d96;
+    --accent:#1e4d8c;
+    --accent-light:#e8eef8;
+    --danger:#a32d2d;
+    --danger-light:#fcebeb;
+    --success:#2d6e3e;
+    --success-light:#e8f5ee;
+    --warn:#7a4f0d;
+    --warn-light:#fdf0dc;
+    --font:'DM Sans',sans-serif;
+    --mono:'DM Mono',monospace;
+    --radius:10px;
+    --radius-sm:6px;
+  }
+  body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
+
+  /* Layout */
+  .shell{max-width:1200px;margin:0 auto;padding:0 1.5rem 3rem}
+  header{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+  .header-inner{max-width:1200px;margin:0 auto;padding:.875rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .logo{display:flex;align-items:center;gap:10px}
+  .logo-icon{width:34px;height:34px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center}
+  .logo-icon svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .logo-text{font-size:15px;font-weight:600;color:var(--text);letter-spacing:-.01em}
+  .logo-sub{font-size:11px;color:var(--text3);letter-spacing:.04em;text-transform:uppercase;margin-top:1px}
+  .header-actions{display:flex;gap:8px}
+
+  /* Buttons */
+  button{font-family:var(--font);cursor:pointer;font-size:13px;border-radius:var(--radius-sm);transition:all .15s;outline:none}
+  .btn{padding:7px 14px;border:1px solid var(--border2);background:var(--surface);color:var(--text);display:inline-flex;align-items:center;gap:6px}
+  .btn:hover{background:var(--surface2);border-color:var(--border2)}
+  .btn:active{transform:scale(.98)}
+  .btn-primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:500}
+  .btn-primary:hover{background:#163d70;border-color:#163d70}
+  .btn-danger{background:none;border:1px solid var(--border);color:var(--danger)}
+  .btn-danger:hover{background:var(--danger-light);border-color:var(--danger)}
+
+  /* Stats */
+  .stats-section{padding:1.5rem 0 1rem}
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.125rem}
+  .stat-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+  .stat-value{font-size:26px;font-weight:600;color:var(--text);letter-spacing:-.02em}
+  .stat-value.warn{color:var(--danger)}
+
+  /* Toolbar */
+  .toolbar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+  .toolbar input[type=text]{flex:1;min-width:200px;font-family:var(--font);font-size:13px;padding:8px 12px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);outline:none}
+  .toolbar input[type=text]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(30,77,140,.1)}
+  .toolbar select{font-family:var(--font);font-size:13px;padding:8px 12px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);outline:none;cursor:pointer}
+  .toolbar select:focus{border-color:var(--accent)}
+
+  /* Table */
+  .tbl-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+  .tbl-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+  thead{background:var(--surface2)}
+  th{padding:10px 14px;text-align:left;font-weight:600;font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border);white-space:nowrap}
+  td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:#faf9f6}
+  th:nth-child(1){width:11%}
+  th:nth-child(2){width:19%}
+  th:nth-child(3){width:14%}
+  th:nth-child(4){width:7%}
+  th:nth-child(5){width:13%}
+  th:nth-child(6){width:13%}
+  th:nth-child(7){width:11%}
+  th:nth-child(8){width:12%}
+
+  /* Badges */
+  .badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;white-space:nowrap}
+  .cat-laptop{background:#e8eef8;color:#163d70}
+  .cat-monitor{background:#e8f0fd;color:#1a4fa0}
+  .cat-network{background:#e8f5ee;color:#1d5c36}
+  .cat-server{background:#fdf0dc;color:#7a4f0d}
+  .cat-peripheral{background:#fceef5;color:#7a1f4a}
+  .cat-mobile{background:#e8f7f3;color:#0d5c44}
+  .cat-cable{background:#f0efe9;color:#3d3c36}
+  .st-active{background:#e8f5ee;color:#1d5c36}
+  .st-storage{background:#f0efe9;color:#3d3c36}
+  .st-repair{background:#fdf0dc;color:#7a4f0d}
+  .st-decom{background:#fcebeb;color:#7a1f1f}
+
+  /* Qty cell */
+  .qty-low{color:var(--danger);font-weight:600}
+  .qty-ok{color:var(--success);font-weight:500}
+
+  /* Action buttons */
+  .icon-btn{background:none;border:none;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;color:var(--text3);padding:0}
+  .icon-btn:hover{background:var(--surface2);color:var(--text)}
+  .icon-btn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  /* Empty */
+  .empty{text-align:center;padding:3rem 1rem;color:var(--text3)}
+  .empty svg{width:40px;height:40px;stroke:var(--border2);margin:0 auto 12px;display:block;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+
+  /* Footer count */
+  .tbl-footer{padding:10px 14px;font-size:12px;color:var(--text3);border-top:1px solid var(--border);background:var(--surface2)}
+
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(10,10,8,.45);display:flex;align-items:center;justify-content:center;z-index:200;padding:1rem}
+  .overlay.hidden{display:none}
+  .modal{background:var(--surface);border-radius:14px;border:1px solid var(--border);width:480px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+  .modal-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .modal-header h2{font-size:15px;font-weight:600}
+  .modal-body{padding:1.25rem 1.5rem}
+  .modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+  .field{margin-bottom:.875rem}
+  .field label{display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:5px}
+  .field input,.field select,.field textarea{width:100%;font-family:var(--font);font-size:13px;padding:8px 11px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);outline:none;transition:border .15s}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(30,77,140,.1)}
+  .field textarea{resize:vertical;min-height:64px;line-height:1.5}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+  /* Toast */
+  .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--text);color:#fff;font-size:13px;padding:10px 16px;border-radius:8px;z-index:300;opacity:0;transition:opacity .25s;pointer-events:none}
+  .toast.show{opacity:1}
+
+  @media(max-width:640px){
+    .header-inner{flex-wrap:wrap}
+    th:nth-child(5),th:nth-child(6),td:nth-child(5),td:nth-child(6){display:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      </div>
+      <div>
+        <div class="logo-text">ICT Inventory</div>
+        <div class="logo-sub">Asset Management</div>
+
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn" onclick="exportCSV()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+      <button class="btn btn-primary" onclick="openAdd()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Item
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <div class="stats-section">
+    <div class="stats-grid" id="stats-grid"></div>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="Search by name, tag, brand, serial, assignee…" oninput="render()">
+    <select id="f-cat" onchange="render()">
+      <option value="">All Categories</option>
+      <option>Computers & Laptops</option>
+      <option>Monitors & Displays</option>
+      <option>Networking Equipment</option>
+      <option>Servers & Storage</option>
+      <option>Peripherals</option>
+      <option>Mobile Devices</option>
+      <option>Cables & Accessories</option>
+    </select>
+    <select id="f-loc" onchange="render()"><option value="">All Locations</option></select>
+    <select id="f-status" onchange="render()">
+      <option value="">All Statuses</option>
+      <option>Active</option>
+      <option>In Storage</option>
+      <option>Under Repair</option>
+      <option>Decommissioned</option>
+    </select>
+  </div>
+
+  <div class="tbl-card">
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Asset Tag</th>
+            <th>Name / Model</th>
+            <th>Category</th>
+            <th>Qty</th>
+            <th>Assigned To</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div id="empty" class="empty" style="display:none">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        No items match your search or filter.
+      </div>
+    </div>
+    <div class="tbl-footer" id="tbl-footer"></div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="overlay hidden" id="overlay" onclick="overlayClick(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="modal-title">Add Item</h2>
+      <button class="icon-btn" onclick="closeModal()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row">
+        <div class="field"><label>Asset Tag / ID</label><input id="f-tag" placeholder="e.g. ICT-001"></div>
+        <div class="field"><label>Brand</label><input id="f-brand" placeholder="e.g. Dell, Cisco…"></div>
+      </div>
+      <div class="field"><label>Name / Model *</label><input id="f-name" placeholder="e.g. Dell Latitude 5540"></div>
+      <div class="field"><label>Category</label>
+        <select id="f-category">
+          <option>Computers & Laptops</option>
+          <option>Monitors & Displays</option>
+          <option>Networking Equipment</option>
+          <option>Servers & Storage</option>
+          <option>Peripherals</option>
+          <option>Mobile Devices</option>
+          <option>Cables & Accessories</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Quantity</label><input id="f-qty" type="number" min="0" value="1"></div>
+        <div class="field"><label>Low Stock Alert (≤)</label><input id="f-low" type="number" min="0" value="2"></div>
+      </div>
+      <div class="field"><label>Serial Number</label><input id="f-serial" placeholder="Optional"></div>
+      <div class="field"><label>Assigned To</label><input id="f-assign" placeholder="Name or department"></div>
+      <div class="field"><label>Location</label><input id="f-loc" placeholder="e.g. Server Room, Office A"></div>
+      <div class="field"><label>Status</label>
+        <select id="f-status-modal">
+          <option>Active</option>
+          <option>In Storage</option>
+          <option>Under Repair</option>
+          <option>Decommissioned</option>
+        </select>
+      </div>
+      <div class="field"><label>Notes</label><textarea id="f-notes" placeholder="Any additional notes…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="del-btn" onclick="deleteItem()" style="display:none;margin-right:auto">Delete Item</button>
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveItem()">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CAT_CLASS = {
+  'Computers & Laptops':'cat-laptop',
+  'Monitors & Displays':'cat-monitor',
+  'Networking Equipment':'cat-network',
+  'Servers & Storage':'cat-server',
+  'Peripherals':'cat-peripheral',
+  'Mobile Devices':'cat-mobile',
+  'Cables & Accessories':'cat-cable',
+};
+const STATUS_CLASS = {
+  'Active':'st-active','In Storage':'st-storage',
+  'Under Repair':'st-repair','Decommissioned':'st-decom'
+};
+
+const STORAGE_KEY = 'ict_inventory_v1';
+
+function loadItems() {
+  try { const d = localStorage.getItem(STORAGE_KEY); return d ? JSON.parse(d) : null; } catch(e) { return null; }
+}
+function saveItems() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch(e) {}
+}
+
+let items = loadItems() || [
+  {id:1,tag:'ICT-001',name:'Dell Latitude 5540',brand:'Dell',cat:'Computers & Laptops',qty:12,low:3,serial:'DL5540-001',assign:'IT Department',loc:'Office A',status:'Active',notes:''},
+  {id:2,tag:'ICT-002',name:'HP EliteDisplay E24',brand:'HP',cat:'Monitors & Displays',qty:8,low:2,serial:'',assign:'Design Team',loc:'Office B',status:'Active',notes:'24" monitors'},
+  {id:3,tag:'ICT-003',name:'Cisco Catalyst 9200',brand:'Cisco',cat:'Networking Equipment',qty:3,low:1,serial:'CSC9200-03',assign:'Infrastructure',loc:'Server Room',status:'Active',notes:'48-port switch'},
+  {id:4,tag:'ICT-004',name:'Dell PowerEdge R750',brand:'Dell',cat:'Servers & Storage',qty:2,low:1,serial:'PE750-A',assign:'DevOps',loc:'Server Room',status:'Active',notes:'Primary application server'},
+  {id:5,tag:'ICT-005',name:'Logitech MX Keys Combo',brand:'Logitech',cat:'Peripherals',qty:2,low:3,serial:'',assign:'Unassigned',loc:'Storage',status:'In Storage',notes:'Keyboard & mouse sets'},
+  {id:6,tag:'ICT-006',name:'iPhone 14 Pro',brand:'Apple',cat:'Mobile Devices',qty:5,low:2,serial:'',assign:'Field Team',loc:'Office A',status:'Active',notes:'Company mobile phones'},
+  {id:7,tag:'ICT-007',name:'Cat6 Ethernet Cable 5m',brand:'Generic',cat:'Cables & Accessories',qty:45,low:10,serial:'',assign:'',loc:'Storage',status:'Active',notes:''},
+  {id:8,tag:'ICT-008',name:'MacBook Pro 14" M3',brand:'Apple',cat:'Computers & Laptops',qty:4,low:2,serial:'',assign:'Management',loc:'Office C',status:'Active',notes:''},
+  {id:9,tag:'ICT-009',name:'UPS APC 1500VA',brand:'APC',cat:'Networking Equipment',qty:1,low:1,serial:'APC-1500',assign:'Infrastructure',loc:'Server Room',status:'Under Repair',notes:'Battery replacement needed'},
+];
+let nextId = items.length ? Math.max(...items.map(i=>i.id)) + 1 : 1;
+let editId = null;
+
+function getFiltered() {
+  const q = (document.getElementById('search').value || '').toLowerCase();
+  const cat = document.getElementById('f-cat').value;
+  const loc = document.getElementById('f-loc').value;
+  const status = document.getElementById('f-status').value;
+  return items.filter(i => {
+    if (cat && i.cat !== cat) return false;
+    if (loc && i.loc !== loc) return false;
+    if (status && i.status !== status) return false;
+    if (q && !`${i.tag} ${i.name} ${i.brand} ${i.serial} ${i.assign} ${i.loc}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function renderStats() {
+  const total = items.length;
+  const active = items.filter(i => i.status === 'Active').length;
+  const low = items.filter(i => i.qty <= i.low).length;
+  const units = items.reduce((a, i) => a + i.qty, 0);
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat"><div class="stat-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg> Total Assets</div><div class="stat-value">${total}</div></div>
+    <div class="stat"><div class="stat-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Active</div><div class="stat-value">${active}</div></div>
+    <div class="stat"><div class="stat-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Low Stock</div><div class="stat-value${low ? ' warn' : ''}">${low}</div></div>
+    <div class="stat"><div class="stat-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg> Total Units</div><div class="stat-value">${units}</div></div>
+  `;
+}
+
+function updateLocFilter() {
+  const locs = [...new Set(items.map(i => i.loc).filter(Boolean))].sort();
+  const sel = document.getElementById('f-loc');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">All Locations</option>' + locs.map(l => `<option${l === cur ? ' selected' : ''}>${l}</option>`).join('');
+}
+
+function render() {
+  const rows = getFiltered();
+  const tbody = document.getElementById('tbody');
+  const empty = document.getElementById('empty');
+  const footer = document.getElementById('tbl-footer');
+  if (!rows.length) { tbody.innerHTML = ''; empty.style.display = 'block'; footer.textContent = ''; return; }
+  empty.style.display = 'none';
+  footer.textContent = `Showing ${rows.length} of ${items.length} items`;
+  tbody.innerHTML = rows.map(i => `
+    <tr>
+      <td style="font-family:var(--mono);font-size:12px;color:var(--text2)">${i.tag || '—'}</td>
+      <td title="${i.brand} ${i.name}" style="font-weight:500">${i.name}<br><span style="font-size:11px;color:var(--text3);font-weight:400">${i.brand}</span></td>
+      <td><span class="badge ${CAT_CLASS[i.cat] || ''}">${i.cat}</span></td>
+      <td class="${i.qty <= i.low ? 'qty-low' : 'qty-ok'}">${i.qty}</td>
+      <td title="${i.assign}">${i.assign || '—'}</td>
+      <td title="${i.loc}">${i.loc || '—'}</td>
+      <td><span class="badge ${STATUS_CLASS[i.status] || ''}">${i.status}</span></td>
+      <td style="text-align:center;white-space:nowrap">
+        <button class="icon-btn" onclick="openEdit(${i.id})" title="Edit item">
+          <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openAdd() {
+  editId = null;
+  document.getElementById('modal-title').textContent = 'Add Item';
+  document.getElementById('del-btn').style.display = 'none';
+  ['f-tag','f-name','f-brand','f-serial','f-assign','f-loc','f-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-qty').value = 1;
+  document.getElementById('f-low').value = 2;
+  document.getElementById('f-category').value = 'Computers & Laptops';
+  document.getElementById('f-status-modal').value = 'Active';
+  document.getElementById('overlay').classList.remove('hidden');
+}
+
+function openEdit(id) {
+  const i = items.find(x => x.id === id); if (!i) return;
+  editId = id;
+  document.getElementById('modal-title').textContent = 'Edit Item';
+  document.getElementById('del-btn').style.display = 'inline-flex';
+  document.getElementById('f-tag').value = i.tag;
+  document.getElementById('f-name').value = i.name;
+  document.getElementById('f-brand').value = i.brand;
+  document.getElementById('f-category').value = i.cat;
+  document.getElementById('f-qty').value = i.qty;
+  document.getElementById('f-low').value = i.low;
+  document.getElementById('f-serial').value = i.serial;
+  document.getElementById('f-assign').value = i.assign;
+  document.getElementById('f-loc').value = i.loc;
+  document.getElementById('f-status-modal').value = i.status;
+  document.getElementById('f-notes').value = i.notes;
+  document.getElementById('overlay').classList.remove('hidden');
+}
+
+function closeModal() { document.getElementById('overlay').classList.add('hidden'); }
+function overlayClick(e) { if (e.target === document.getElementById('overlay')) closeModal(); }
+
+function saveItem() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { alert('Please enter a name / model.'); return; }
+  const obj = {
+    tag: document.getElementById('f-tag').value.trim() || 'ICT-' + String(nextId).padStart(3,'0'),
+    name, brand: document.getElementById('f-brand').value.trim(),
+    cat: document.getElementById('f-category').value,
+    qty: parseInt(document.getElementById('f-qty').value) || 0,
+    low: parseInt(document.getElementById('f-low').value) || 0,
+    serial: document.getElementById('f-serial').value.trim(),
+    assign: document.getElementById('f-assign').value.trim(),
+    loc: document.getElementById('f-loc').value.trim(),
+    status: document.getElementById('f-status-modal').value,
+    notes: document.getElementById('f-notes').value.trim(),
+  };
+  if (editId) { Object.assign(items.find(x => x.id === editId), obj); toast('Item updated'); }
+  else { obj.id = nextId++; items.push(obj); toast('Item added'); }
+  saveItems();
+  closeModal(); updateLocFilter(); renderStats(); render();
+}
+
+function deleteItem() {
+  if (!editId) return;
+  if (!confirm('Delete this item? This cannot be undone.')) return;
+  items = items.filter(x => x.id !== editId);
+  saveItems(); closeModal(); updateLocFilter(); renderStats(); render();
+  toast('Item deleted');
+}
+
+function exportCSV() {
+  const cols = ['tag','name','brand','cat','qty','low','serial','assign','loc','status','notes'];
+  const header = ['Asset Tag','Name','Brand','Category','Qty','Low Stock','Serial','Assigned To','Location','Status','Notes'];
+  const rows = getFiltered().map(i => cols.map(c => `"${String(i[c]||'').replace(/"/g,'""')}"`).join(','));
+  const csv = [header.join(','), ...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'ict_inventory_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  toast('CSV exported');
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+updateLocFilter(); renderStats(); render();
+</script>
+</body>
+</html>
